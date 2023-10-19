@@ -42,7 +42,7 @@ jobs:
             flags: 'g'
   
       - name: Generate Deployment Package
-        run: zip -r deploy_address.zip address-service/* -x "**node_modules**"
+        run: zip -r address-service/deploy_address.zip address-service/* -x "**node_modules**"
   
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v16
@@ -53,5 +53,5 @@ jobs:
             environment_name: Docker-test-env
             version_label: "docker-app-${{ steps.format-time.outputs.replaced }}"
             region: ap-southeast-1
-            deployment_package: deploy_address.zip
+            deployment_package: address-service/deploy_address.zip
 
