@@ -2,7 +2,7 @@ FROM node:latest
 WORKDIR /app
 COPY address-service/package*.json ./
 RUN npm ci
-COPY . ./
+COPY address-service/. ./
 CMD ["npm", "start"]
 EXPOSE 8080
 
