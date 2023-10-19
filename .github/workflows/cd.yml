@@ -53,5 +53,5 @@ jobs:
             environment_name: Docker-test-env
             version_label: "docker-app-${{ steps.format-time.outputs.replaced }}"
             region: ap-southeast-1
-            deployment_package: address-service/deploy_address.zip
+            deployment_package: address-service/address-service.zip
 
