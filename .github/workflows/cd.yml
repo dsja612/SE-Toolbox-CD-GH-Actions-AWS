@@ -24,15 +24,15 @@ jobs:
 
       - name: Get Node.js version
         run: |
-          echo "VERSION=$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_ENV"
+          echo "VERSION=$(node -p 'require("./package.json\").version')" >> "$GITHUB_ENV"
 
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v21
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: AddressBook
-          environment_name: AddressBook-env
+          application_name: ABApp
+          environment_name: ABApp-env
           version_label: 1.0.1
           region: ap-southeast-1
           deployment_package: address-book-app.zip
