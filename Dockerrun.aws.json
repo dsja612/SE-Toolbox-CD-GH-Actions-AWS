@@ -1,7 +1,7 @@
 {
     "AWSEBDockerrunVersion": "1",
     "Image": {
-        "Name": "se-toolbox/test:latest",
+        "Name": "dsja612/se-toolbox:latest",
         "Update": "true"
     },
     "Ports": [
