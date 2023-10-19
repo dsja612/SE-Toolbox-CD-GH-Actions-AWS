@@ -1,0 +1,23 @@
+version: '3'
+services:
+  user-service:
+    image: "dsja612/se-toolbox:user-latest"
+    ports:
+      - "80:5000"
+    env_file:
+      - .env
+    depends_on:
+      - user-db
+
+  user-db:
+  image: "postgres:13"
+  container_name: user-db
+  ports:
+    - "5432:5432"
+  restart: always
+  environment:
+    POSTGRES_USER: localuser
+    POSTGRES_PASSWORD: 12345
+    POSTGRES_DB: peerprep
+  volumes:
+    - user-data:/var/lib/postgresql/data
