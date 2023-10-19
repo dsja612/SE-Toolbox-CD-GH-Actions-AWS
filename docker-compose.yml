@@ -1,9 +1,7 @@
 version: '3'
 services:
   node-app:
-    build:
-      context: .
-      dockerfile: Dockerfile.prod
+    image: "dsja612/se-toolbox:latest"
     ports:
       - "80:8080"
     env_file:
