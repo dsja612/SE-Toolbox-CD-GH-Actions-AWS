@@ -1,6 +1,6 @@
 version: '3'
 services:
-  node-app:
+  address-service:
     image: "dsja612/se-toolbox:latest"
     ports:
       - "80:8080"
