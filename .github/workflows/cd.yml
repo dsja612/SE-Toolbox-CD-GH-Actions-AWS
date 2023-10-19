@@ -21,13 +21,13 @@ jobs:
                 logout: true
         
           - name: Build Server image
-            run: docker build -t se-toolbox/docker-test-env -f
+            run: docker build -t dsja612/se-toolbox -f
                     ./Dockerfile ./
           - name: Tag our Image
-            run: docker tag se-toolbox/docker-test-env 
-                se-toolbox/docker-test-env:latest
+            run: docker tag dsja612/se-toolbox 
+                dsja612/se-toolbox:latest
           - name: Push to dockerhub
-            run: docker push se-toolbox/docker-test-env
+            run: docker push dsja612/se-toolbox
     
           - name: Deploy to EB
             uses: einaregilsson/beanstalk-deploy@v14
