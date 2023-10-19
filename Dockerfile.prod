@@ -4,7 +4,7 @@ COPY ./package*.json ./
 RUN npm ci
 COPY . ./
 CMD ["npm", "start"]
-EXPOSE 8080
+EXPOSE 80
 
 # FROM nginx
 # COPY --from=build /app/build /usr/share/nginx/html
