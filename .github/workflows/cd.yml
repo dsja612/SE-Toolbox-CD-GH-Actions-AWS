@@ -1,0 +1,38 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x' 
+          cache: npm
+
+      - name: Generate deployment package
+        run: zip -r address-book-app.zip config controllers models routes index.js package.json .env
+
+      - name: Get Node.js version
+        run: |
+          echo "VERSION=$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_ENV"
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: $
+          aws_secret_key: $
+          application_name: AddressBookApp
+          environment_name: AddressBookApp-env
+          version_label: $
+          region: ap-southeast-1
+          deployment_package: address-book-app.zip
