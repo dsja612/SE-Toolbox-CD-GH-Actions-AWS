@@ -26,7 +26,7 @@ jobs:
           context: .
           file: address-service/Dockerfile
           push: true
-          tags: dsja612/se-toolbox:latest
+          tags: dsja612/se-toolbox:address-latest
 
       - name: Get Timestamp
         uses: gerred/actions/current-time@master
