@@ -6,29 +6,35 @@ on:
       - master
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+    build_docker_images:
+        name: build docker images
+        runs-on: [ubuntu-latest]
+        steps:
+          - name: checkout
+            uses: actions/checkout@v2
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Docker Compose
-        run: |
-          docker-compose -f docker-compose.yml up -d
-        working-directory: ./
-
-      - name: Get Node.js version
-        run: |
-          echo "VERSION=$(node -p 'require("./package.json").version')" >> "$GITHUB_ENV"
-
-      - name: Deploy to EB
-        uses: einaregilsson/beanstalk-deploy@v21
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: Docker-test
-          environment_name: Docker-test-env
-          version_label: 1.0.1
-          region: ap-southeast-1
-          deployment_package: address-book-app.zip
+          - name: Docker Login
+            uses: docker/login-action@v1.8.0
+            with:
+                username: ${{secrets.DOCKERHUB_USERNAME}}
+                password: ${{secrets.DOCKERHUB_TOKEN}}
+                logout: true
+        
+          - name: Build Server image
+            run: docker build -t SE-Toolbox-CD-GH-Actions-AWS/Docker-test-env -f
+                    ./Dockerfile ./
+          - name: Tag our Image
+            run: docker tag SE-Toolbox-CD-GH-Actions-AWS/Docker-test-env 
+                    SE-Toolbox-CD-GH-Actions-AWS/Docker-test-env:latest
+          - name: Push to dockerhub
+            run: docker push SE-Toolbox-CD-GH-Actions-AWS/Docker-test-env
+    
+          - name: Deploy to EB
+            uses: einaregilsson/beanstalk-deploy@v14
+            with:
+                aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                application_name: Docker-test
+                environment_name: Docker-test-env
+                version_label: 1.0.1
+                region: ap-southeast-1
