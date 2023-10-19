@@ -21,13 +21,13 @@ jobs:
                 logout: true
         
           - name: Build Server image
-            run: docker build -t SE-Toolbox-CD-GH-Actions-AWS/Docker-test-env -f
+            run: docker build -t se-toolbox/docker-test-env -f
                     ./Dockerfile ./
           - name: Tag our Image
-            run: docker tag SE-Toolbox-CD-GH-Actions-AWS/Docker-test-env 
-                    SE-Toolbox-CD-GH-Actions-AWS/Docker-test-env:latest
+            run: docker tag se-toolbox/docker-test-env 
+                se-toolbox/docker-test-env:latest
           - name: Push to dockerhub
-            run: docker push SE-Toolbox-CD-GH-Actions-AWS/Docker-test-env
+            run: docker push se-toolbox/docker-test-env
     
           - name: Deploy to EB
             uses: einaregilsson/beanstalk-deploy@v14
