@@ -13,26 +13,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x' 
-          cache: npm
-
-      - name: Generate deployment package
-        run: zip -r address-book-app.zip config controllers models routes index.js package.json .env
+      - name: Set up Docker Compose
+        run: |
+          docker-compose -f docker-compose.yml up -d
+        working-directory: ./
 
       - name: Get Node.js version
         run: |
-          echo "VERSION=$(node -p 'require("./package.json\").version')" >> "$GITHUB_ENV"
+          echo "VERSION=$(node -p 'require("./package.json").version')" >> "$GITHUB_ENV"
 
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v21
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: ABApp
-          environment_name: ABApp-env
+          application_name: Docker-test
+          environment_name: Docker-test-env
           version_label: 1.0.1
           region: ap-southeast-1
           deployment_package: address-book-app.zip
