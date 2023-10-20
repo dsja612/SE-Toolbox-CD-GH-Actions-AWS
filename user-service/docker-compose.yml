@@ -5,9 +5,11 @@ services:
     ports:
       - "80:5000"
     environment:
-      POSTGRES_USER: localuser
-      POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: peerprep
+      MONGOURL: "mongodb+srv://peerprep15:CRFVdZNswqisruzv@peerprep.vmiy632.mongodb.net/?retryWrites=true&w=majority" # Add MongoDB connection URL
+      PG_USER: localuser
+      PG_PASSWORD: 12345
+      PG_DB: peerprep
+      PG_HOST: user-db
     depends_on:
       - user-db
 
