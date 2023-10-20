@@ -4,8 +4,10 @@ services:
     image: "dsja612/se-toolbox:user-latest"
     ports:
       - "80:5000"
-    env_file:
-      - .env
+    environment:
+      POSTGRES_USER: localuser
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: peerprep
     depends_on:
       - user-db
 
