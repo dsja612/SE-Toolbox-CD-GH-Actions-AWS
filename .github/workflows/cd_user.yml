@@ -26,7 +26,7 @@ jobs:
           context: .
           file: backend/user-service/Dockerfile
           push: true
-          tags: peerprep15:user-latest
+          tags: peerprep15/peerprep15:user-latest
 
       - name: Get Timestamp
         uses: gerred/actions/current-time@master
@@ -42,16 +42,16 @@ jobs:
             flags: 'g'
   
       - name: Generate Deployment Package
-        run: cd user-service; zip -r user-service.zip * -x "**node_modules**" # Must cd into the directory before zipping
+        run: cd backend/user-service; zip -r user-service.zip * -x "**node_modules**" # Must cd into the directory before zipping
   
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v16
         with:
             aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
             aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            application_name: Test-user-service
-            environment_name: Test-user-service-env
+            application_name: user-service
+            environment_name: user-service-env
             version_label: "docker-app-${{ steps.format-time.outputs.replaced }}"
             region: ap-southeast-1
-            deployment_package: user-service/user-service.zip
+            deployment_package: backend/user-service/user-service.zip
 
