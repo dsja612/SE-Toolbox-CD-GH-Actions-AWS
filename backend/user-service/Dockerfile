@@ -1,7 +1,7 @@
 FROM node:latest
 WORKDIR /app
-COPY user-service/package*.json ./
+COPY backend/user-service/package*.json ./
 RUN npm ci
-COPY user-service/. .
+COPY backend/user-service/. .
 CMD ["npm", "run", "dev"]
 EXPOSE 5000
