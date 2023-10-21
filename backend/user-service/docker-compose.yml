@@ -1,7 +1,7 @@
 version: '3'
 services:
   user-service:
-    image: "dsja612/se-toolbox:user-latest"
+    image: "peerprep15/peerprep15:user-latest"
     ports:
       - "80:5000"
     env_file:
