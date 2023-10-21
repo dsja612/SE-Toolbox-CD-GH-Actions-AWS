@@ -12,10 +12,9 @@ const app = express();
 const server = http.createServer(app);
 const io = require('socket.io')(server, {
   cors: {
-    origin: '*',
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     methods: ["GET", "POST"],
-  },
-  transports: ['websocket']
+  }
 });
 
 
