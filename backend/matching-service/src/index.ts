@@ -6,23 +6,23 @@ import http from 'http';
 import { rabbitMQSetup } from './services/rabbitmq-service';
 import { processQueues } from './services/rabbitmq-service';
 import { setupSockets } from './sockets/socketHandler';
+import { Server } from "socket.io";
 
 const PORT = process.env.MATCHING_PORT || 3000;
 const app = express();
 const server = http.createServer(app);
-const io = require('socket.io')(server, {
+const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     methods: ["GET", "POST"],
   }
 });
 
+app.use(bodyParser.json());
 
 server.listen(PORT, () => {
   console.log(`matching service is running on port ${PORT}`);
 });
-
-app.use(bodyParser.json());
 
 rabbitMQSetup().then((channel) => {
   setupSockets(io, channel);
