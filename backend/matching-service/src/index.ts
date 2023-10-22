@@ -7,6 +7,7 @@ import { rabbitMQSetup } from './services/rabbitmq-service';
 import { processQueues } from './services/rabbitmq-service';
 import { setupSockets } from './sockets/socketHandler';
 import { Server } from "socket.io";
+import cors from 'cors';
 
 const PORT = process.env.MATCHING_PORT || 3000;
 const app = express();
@@ -19,6 +20,7 @@ const io = new Server(server, {
 });
 
 app.use(bodyParser.json());
+app.use(cors());
 
 server.listen(PORT, () => {
   console.log(`matching service is running on port ${PORT}`);
