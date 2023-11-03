@@ -8,6 +8,7 @@ services:
       - "8080:8080" # map host port:8080 to container's port:8080
     environment:
       MONGOURL: ${MONGOURL}
+      FRONTEND_URL: "http://frontend:4000"
 
   collaboration-service:
     build:
@@ -15,6 +16,8 @@ services:
       dockerfile: ./dockerfiles/dockerfile.collaboration-service
     ports:
       - "4000:4000"
+    environment:
+      FRONTEND_URL: "http://frontend:4000"
     
   history-service:
     build:
@@ -24,6 +27,7 @@ services:
       - "7000:7000"
     environment:
       MONGOURL: ${MONGOURL}
+      FRONTEND_URL: "http://frontend:4000"
   
   user-db:
     image: "postgres:13"
@@ -46,6 +50,7 @@ services:
       - "5000:5000" # map host port:5000 to container's port:5000
     environment:
       MONGOURL: ${MONGOURL}
+      FRONTEND_URL: "http://frontend:4000"
       PG_USER: localuser
       PG_PASSWORD: 12345
       PG_DB: peerprep
@@ -76,6 +81,7 @@ services:
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
       QUESTIONS_SERVICE_URL: "http://ques-service:8080/questions"
       COLLABORATION_SERVICE_URL: "http://collaboration-service:4000/rooms"
+      FRONTEND_URL: "http://frontend:4000"
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -87,6 +93,12 @@ services:
       dockerfile: ./dockerfiles/dockerfile.frontend
     ports:
       - "80:5173"
+    environment:
+      VITE_AUTH_SERVICE_URL: "http://user-service:5000/auth"
+      VITE_COLLABORATION_SERVICE_URL: "http://collaboration-service:4000/"
+      VITE_MATCHING_SERVICE_URL: "http://matching-service:3000/"
+      VITE_QUESTIONS_SERVICE_URL: "http://question-service:8080/questions"
+      VITE_USERS_SERVICE_URL: "http://user-service:5000/users"
     depends_on:
       - user-service
       - matching-service
