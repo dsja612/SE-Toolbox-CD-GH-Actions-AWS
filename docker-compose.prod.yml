@@ -1,0 +1,86 @@
+version: '3'
+services:
+  ques-service:
+    image: "peerprep15/peerprep15:question-latest"
+    ports:
+      - "8080:8080" # map host port:8080 to container's port:8080
+    environment:
+      MONGOURL: ${MONGOURL}
+
+  collaboration-service:
+    image: "peerprep15/peerprep15:collaboration-latest"
+    ports:
+      - "4000:4000"
+    
+  history-service:
+    image: "peerprep15/peerprep15:history-latest"
+    ports:
+      - "7000:7000"
+    environment:
+      MONGOURL: ${MONGOURL}
+  
+  user-db:
+    image: "postgres:13"
+    container_name: user-db
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_USER: localuser
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: peerprep
+    volumes:
+      - user-data:/var/lib/postgresql/data
+
+  user-service:
+    image: "peerprep15/peerprep15:user-latest"
+    ports:
+      - "5000:5000" # map host port:5000 to container's port:5000
+    environment:
+      MONGOURL: ${MONGOURL}
+      PG_USER: localuser
+      PG_PASSWORD: 12345
+      PG_DB: peerprep
+      PG_HOST: user-db
+
+    depends_on: 
+      - user-db
+
+  rabbitmq:
+    image: "rabbitmq:3-management-alpine"
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "rabbitmq", "5672" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+
+  matching-service:
+    image: "peerprep15/peerprep15:matching-latest"
+    ports:
+      - "3000:3000"
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      QUESTIONS_SERVICE_URL: "http://ques-service:8080/questions"
+      COLLABORATION_SERVICE_URL: "http://collaboration-service:4000/rooms"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+
+  frontend:
+    image: "peerprep15/peerprep15:frontend-latest"
+    ports:
+      - "80:5173"
+    depends_on:
+      - user-service
+      - matching-service
+      - history-service
+      - ques-service
+      - collaboration-service
+
+volumes:
+  user-data:
