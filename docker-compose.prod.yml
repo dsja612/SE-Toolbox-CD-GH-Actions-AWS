@@ -4,11 +4,10 @@ services:
     build:
       context: . 
       dockerfile: ./dockerfiles/dockerfile.ques-service
-    # ports:
-    #   - "8080:8080" # map host port:8080 to container's port:8080
-    environment:
-      MONGOURL: ${MONGOURL}
-      FRONTEND_URL: ${FRONTEND_URL}
+    ports:
+      - "8080:8080" # map host port:8080 to container's port:8080
+    env_file:
+      - .env
     networks:
       - peerprep
 
@@ -16,10 +15,10 @@ services:
     build:
       context: .
       dockerfile: ./dockerfiles/dockerfile.collaboration-service
-    # ports:
-    #   - "4000:4000"
-    environment:
-      FRONTEND_URL: ${FRONTEND_URL}
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
     networks:
       - peerprep
     
@@ -27,19 +26,18 @@ services:
     build:
       context: .
       dockerfile: ./dockerfiles/dockerfile.history-service
-    # ports:
-    #   - "7000:7000"
-    environment:
-      MONGOURL: ${MONGOURL}
-      FRONTEND_URL: ${FRONTEND_URL}
+    ports:
+      - "7000:7000"
+    env_file:
+      - .env
     networks:
       - peerprep
   
   user-db:
     image: "postgres:13"
     container_name: user-db
-    # ports:
-    #   - "5432:5432"
+    ports:
+      - "5432:5432"
     restart: always
     environment:
       POSTGRES_USER: localuser
@@ -54,15 +52,10 @@ services:
     build:
       context: .
       dockerfile: ./dockerfiles/dockerfile.user-service
-    # ports:
-    #   - "5000:5000" # map host port:5000 to container's port:5000
-    environment:
-      MONGOURL: ${MONGOURL}
-      FRONTEND_URL: ${FRONTEND_URL}
-      PG_USER: localuser
-      PG_PASSWORD: 12345
-      PG_DB: peerprep
-      PG_HOST: user-db
+    ports:
+      - "5000:5000" # map host port:5000 to container's port:5000
+    env_file:
+      - .env
     depends_on: 
       - user-db
     networks:
@@ -71,9 +64,9 @@ services:
   rabbitmq:
     image: "rabbitmq:3-management-alpine"
     container_name: rabbitmq
-    # ports:
-    #   - "5672:5672"
-    #   - "15672:15672"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     healthcheck:
       test: [ "CMD", "nc", "-z", "rabbitmq", "5672" ]
       interval: 5s
@@ -86,13 +79,13 @@ services:
     build:
       context: .
       dockerfile: ./dockerfiles/dockerfile.matching-service
-    # ports:
-    #   - "3000:3000"
+    ports:
+      - "3000:3000"
     environment:
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
       QUESTIONS_SERVICE_URL: "http://ques-service:8080/questions"
       COLLABORATION_SERVICE_URL: "http://collaboration-service:4000/rooms"
-      FRONTEND_URL: ${FRONTEND_URL}
+      FRONTEND_URL: "http://peerprep-g15.ap-northeast-1.elasticbeanstalk.com"
     depends_on:
       rabbitmq:
         condition: service_healthy
