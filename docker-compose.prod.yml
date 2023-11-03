@@ -97,7 +97,7 @@ services:
       context: .
       dockerfile: ./dockerfiles/dockerfile.frontend
     ports:
-      - "80:5173"
+      - "5173:80"
     environment:
       VITE_AUTH_SERVICE_URL: "http://user-service:5000/auth"
       VITE_COLLABORATION_SERVICE_URL: "http://collaboration-service:4000/"
