@@ -4,8 +4,8 @@ services:
     image: "peerprep15/peerprep15:question-latest"
     ports:
       - "8080:8080" # map host port:8080 to container's port:8080
-    environment:
-      MONGOURL: ${MONGOURL}
+    env_file:
+      - .env
 
   collaboration-service:
     image: "peerprep15/peerprep15:collaboration-latest"
@@ -16,8 +16,8 @@ services:
     image: "peerprep15/peerprep15:history-latest"
     ports:
       - "7000:7000"
-    environment:
-      MONGOURL: ${MONGOURL}
+    env_file:
+      - .env
   
   user-db:
     image: "postgres:13"
@@ -37,11 +37,12 @@ services:
     ports:
       - "5000:5000" # map host port:5000 to container's port:5000
     environment:
-      MONGOURL: ${MONGOURL}
       PG_USER: localuser
       PG_PASSWORD: 12345
       PG_DB: peerprep
       PG_HOST: user-db
+    env_file:
+      - .env
 
     depends_on: 
       - user-db
