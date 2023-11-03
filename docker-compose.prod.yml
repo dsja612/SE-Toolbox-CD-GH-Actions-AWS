@@ -1,23 +1,29 @@
 version: '3'
 services:
   ques-service:
-    image: "peerprep15/peerprep15:question-latest"
+    build:
+      context: . 
+      dockerfile: ./dockerfiles/dockerfile.ques-service
     ports:
       - "8080:8080" # map host port:8080 to container's port:8080
-    env_file:
-      - .env
+    environment:
+      MONGOURL: ${MONGOURL}
 
   collaboration-service:
-    image: "peerprep15/peerprep15:collaboration-latest"
+    build:
+      context: .
+      dockerfile: ./dockerfiles/dockerfile.collaboration-service
     ports:
       - "4000:4000"
     
   history-service:
-    image: "peerprep15/peerprep15:history-latest"
+    build:
+      context: .
+      dockerfile: ./dockerfiles/dockerfile.history-service
     ports:
       - "7000:7000"
-    env_file:
-      - .env
+    environment:
+      MONGOURL: ${MONGOURL}
   
   user-db:
     image: "postgres:13"
@@ -33,16 +39,17 @@ services:
       - user-data:/var/lib/postgresql/data
 
   user-service:
-    image: "peerprep15/peerprep15:user-latest"
+    build:
+      context: .
+      dockerfile: ./dockerfiles/dockerfile.user-service
     ports:
       - "5000:5000" # map host port:5000 to container's port:5000
     environment:
+      MONGOURL: ${MONGOURL}
       PG_USER: localuser
       PG_PASSWORD: 12345
       PG_DB: peerprep
       PG_HOST: user-db
-    env_file:
-      - .env
 
     depends_on: 
       - user-db
@@ -60,7 +67,9 @@ services:
       retries: 5
 
   matching-service:
-    image: "peerprep15/peerprep15:matching-latest"
+    build:
+      context: .
+      dockerfile: ./dockerfiles/dockerfile.matching-service
     ports:
       - "3000:3000"
     environment:
@@ -73,7 +82,9 @@ services:
     restart: on-failure
 
   frontend:
-    image: "peerprep15/peerprep15:frontend-latest"
+    build:
+      context: .
+      dockerfile: ./dockerfiles/dockerfile.frontend
     ports:
       - "80:5173"
     depends_on:

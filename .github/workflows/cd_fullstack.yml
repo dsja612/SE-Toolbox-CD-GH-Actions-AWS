@@ -82,8 +82,7 @@ jobs:
             flags: 'g'
   
       - name: Generate Deployment Package
-        run: zip -r app.zip *;
-        # run: rm docker-compose.yml; mv docker-compose.prod.yml docker-compose.yml; zip -r app.zip *;
+        run: rm docker-compose.yml; mv docker-compose.prod.yml docker-compose.yml; zip -r app.zip *;
   
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v16
