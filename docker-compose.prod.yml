@@ -1,37 +1,29 @@
 version: '3'
 services:
   ques-service:
-    container_name: ques-service
     build:
       context: . 
       dockerfile: ./dockerfiles/dockerfile.ques-service
     ports:
       - "8080:8080" # map host port:8080 to container's port:8080
-    env_file:
-      - .env
-
+    environment:
+      MONGOURL: ${MONGOURL}
 
   collaboration-service:
-    container_name: collaboration-service
     build:
       context: .
       dockerfile: ./dockerfiles/dockerfile.collaboration-service
     ports:
       - "4000:4000"
-    env_file:
-      - .env
-
     
   history-service:
-    container_name: history-service
     build:
       context: .
       dockerfile: ./dockerfiles/dockerfile.history-service
     ports:
       - "7000:7000"
-    env_file:
-      - .env
-
+    environment:
+      MONGOURL: ${MONGOURL}
   
   user-db:
     image: "postgres:13"
@@ -46,19 +38,21 @@ services:
     volumes:
       - user-data:/var/lib/postgresql/data
 
-
   user-service:
-    container_name: user-service
     build:
       context: .
       dockerfile: ./dockerfiles/dockerfile.user-service
     ports:
       - "5000:5000" # map host port:5000 to container's port:5000
-    env_file:
-      - .env
+    environment:
+      MONGOURL: ${MONGOURL}
+      PG_USER: localuser
+      PG_PASSWORD: 12345
+      PG_DB: peerprep
+      PG_HOST: user-db
+
     depends_on: 
       - user-db
-
 
   rabbitmq:
     image: "rabbitmq:3-management-alpine"
@@ -72,9 +66,7 @@ services:
       timeout: 30s
       retries: 5
 
-
   matching-service:
-    container_name: matching-service
     build:
       context: .
       dockerfile: ./dockerfiles/dockerfile.matching-service
@@ -84,32 +76,37 @@ services:
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
       QUESTIONS_SERVICE_URL: "http://ques-service:8080/questions"
       COLLABORATION_SERVICE_URL: "http://collaboration-service:4000/rooms"
-      FRONTEND_URL: "http://peerprep-g15.ap-northeast-1.elasticbeanstalk.com"
     depends_on:
       rabbitmq:
         condition: service_healthy
     restart: on-failure
 
-
   frontend:
-    container_name: frontend
     build:
       context: .
       dockerfile: ./dockerfiles/dockerfile.frontend
     ports:
-      - "80:5173"
+      - "5173:5173"
     environment:
-      VITE_AUTH_SERVICE_URL: "http://user-service:5000/auth"
-      VITE_COLLABORATION_SERVICE_URL: "http://collaboration-service:4000/"
-      VITE_MATCHING_SERVICE_URL: "http://matching-service:3000/"
-      VITE_QUESTIONS_SERVICE_URL: "http://ques-service:8080/questions"
-      VITE_USERS_SERVICE_URL: "http://user-service:5000/users"
+      VITE_AUTH_SERVICE_URL: "http://user-service:5000/auth"  # Use service name as the URL
+      VITE_COLLABORATION_SERVICE_URL: "http://collaboration-service:4000/"  # Use service name as the URL
+      VITE_MATCHING_SERVICE_URL: "http://matching-service:3000/"  # Use service name as the URL
+      VITE_QUESTIONS_SERVICE_URL: "http://ques-service:8080/questions"  # Use service name as the URL
+      VITE_USERS_SERVICE_URL: "http://user-service:5000/users"  # Use service name as the URL
     depends_on:
       - user-service
       - matching-service
       - history-service
       - ques-service
       - collaboration-service
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
 
 volumes:
   user-data:

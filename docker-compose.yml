@@ -94,5 +94,13 @@ services:
       - ques-service
       - collaboration-service
 
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
 volumes:
   user-data:
