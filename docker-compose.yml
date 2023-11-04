@@ -8,7 +8,8 @@ services:
       - "8080:8080" # map host port:8080 to container's port:8080
     environment:
       MONGOURL: ${MONGOURL}
-      FRONTEND_URL: "http://frontend:4000"
+    networks:
+      - peerprep-network
 
   collaboration-service:
     build:
@@ -16,8 +17,8 @@ services:
       dockerfile: ./dockerfiles/dockerfile.collaboration-service
     ports:
       - "4000:4000"
-    environment:
-      FRONTEND_URL: "http://frontend:4000"
+    networks:
+      - peerprep-network
     
   history-service:
     build:
@@ -27,11 +28,12 @@ services:
       - "7000:7000"
     environment:
       MONGOURL: ${MONGOURL}
-      FRONTEND_URL: "http://frontend:4000"
+    networks:
+      - peerprep-network
   
   user-db:
     image: "postgres:13"
-    container_name: user-db
+    container_name: user-db-1
     ports:
       - "5432:5432"
     restart: always
@@ -41,6 +43,8 @@ services:
       POSTGRES_DB: peerprep
     volumes:
       - user-data:/var/lib/postgresql/data
+    networks:
+      - peerprep-network
 
   user-service:
     build:
@@ -50,18 +54,18 @@ services:
       - "5000:5000" # map host port:5000 to container's port:5000
     environment:
       MONGOURL: ${MONGOURL}
-      FRONTEND_URL: "http://frontend:4000"
       PG_USER: localuser
       PG_PASSWORD: 12345
       PG_DB: peerprep
       PG_HOST: user-db
-
     depends_on: 
       - user-db
+    networks:
+      - peerprep-network
 
   rabbitmq:
     image: "rabbitmq:3-management-alpine"
-    container_name: rabbitmq
+    container_name: rabbitmq-1
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -70,6 +74,8 @@ services:
       interval: 5s
       timeout: 30s
       retries: 5
+    networks:
+      - peerprep-network
 
   matching-service:
     build:
@@ -79,32 +85,57 @@ services:
       - "3000:3000"
     environment:
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
-      QUESTIONS_SERVICE_URL: "http://ques-service:8080/questions"
-      COLLABORATION_SERVICE_URL: "http://collaboration-service:4000/rooms"
-      FRONTEND_URL: "http://frontend:4000"
+      QUESTIONS_SERVICE_URL: "/ques-service/questions"
+      COLLABORATION_SERVICE_URL: "/collaboration-service/rooms"
     depends_on:
       rabbitmq:
         condition: service_healthy
     restart: on-failure
+    networks:
+      - peerprep-network
 
   frontend:
     build:
       context: .
       dockerfile: ./dockerfiles/dockerfile.frontend
     ports:
-      - "80:5173"
+      - "5173:5173"
     environment:
-      VITE_AUTH_SERVICE_URL: "http://user-service:5000/auth"
-      VITE_COLLABORATION_SERVICE_URL: "http://collaboration-service:4000/"
-      VITE_MATCHING_SERVICE_URL: "http://matching-service:3000/"
-      VITE_QUESTIONS_SERVICE_URL: "http://question-service:8080/questions"
-      VITE_USERS_SERVICE_URL: "http://user-service:5000/users"
+      VITE_AUTH_SERVICE_URL: "/user-service/auth" 
+      VITE_COLLABORATION_SERVICE_URL: "/collaboration-socket" 
+      VITE_MATCHING_SERVICE_URL: "/matching-service" 
+      VITE_QUESTIONS_SERVICE_URL: "/ques-service/questions" 
+      VITE_USERS_SERVICE_URL: "/user-service/users" 
     depends_on:
       - user-service
       - matching-service
       - history-service
       - ques-service
       - collaboration-service
+    networks:
+      - peerprep-network
+
+  proxy:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    container_name: "proxy"
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - user-service
+      - matching-service
+      - history-service
+      - ques-service
+      - collaboration-service
+      - frontend
+    networks:
+      - peerprep-network
 
 volumes:
   user-data:
+
+networks:
+  peerprep-network:
+    driver: bridge
