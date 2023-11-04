@@ -93,5 +93,5 @@ jobs:
             environment_name: peerprep
             version_label: "docker-app-${{ steps.format-time.outputs.replaced }}"
             region: ap-southeast-1
-            deployment_package: app.zip
+            deployment_package: app.zip 
 
