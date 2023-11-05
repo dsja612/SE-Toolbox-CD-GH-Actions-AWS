@@ -23,7 +23,6 @@ app.use(bodyParser.json());
 
 app.use(cookieParser());
 app.use(session({
-    name: 'session',
     secret: 'secret',
     resave: false,
     saveUninitialized: false,
